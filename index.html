@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moda | Studio Elara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       TOKENS & RESET
+    ============================================================ */
+    :root {
+      --black:    #0a0806;
+      --surface:  #111009;
+      --card:     #16140f;
+      --border:   #2a2620;
+      --gold:     #c9a96e;
+      --rose:     #d4748a;
+      --white:    #f5f0ea;
+      --muted:    #7a7268;
+      --gradient: linear-gradient(135deg, var(--gold), var(--rose));
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body:    'Jost', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+    /* ============================================================
+       UTILITY
+    ============================================================ */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    .gradient-text {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-label {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--gold);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(.16,1,.3,1), transform 0.8s cubic-bezier(.16,1,.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
+    .stagger-4 { transition-delay: 0.4s; }
+    .stagger-5 { transition-delay: 0.5s; }
+
+    section { padding: 120px 0; }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 0;
+      transition: background 0.4s, backdrop-filter 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(10,8,6,0.90);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+    }
+    .nav-logo span { color: var(--gold); font-style: italic; }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta {
+      background: var(--gold);
+      color: var(--black) !important;
+      padding: 8px 22px;
+      border-radius: 100px;
+      font-weight: 500 !important;
+      letter-spacing: 0.08em !important;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    @media (max-width: 768px) { .nav-links { display: none; } }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 120px 0 80px;
+    }
+
+    #particle-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Grade de fundo — padrão xadrez sutil */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    .hero-glow-1 {
+      width: 600px; height: 600px;
+      background: rgba(201,169,110,0.10);
+      top: -100px; left: -100px;
+    }
+    .hero-glow-2 {
+      width: 500px; height: 500px;
+      background: rgba(212,116,138,0.08);
+      bottom: -100px; right: -50px;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 860px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201,169,110,0.08);
+      border: 1px solid rgba(201,169,110,0.2);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(44px, 7vw, 88px);
+      font-weight: 300;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      margin-bottom: 28px;
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 1.8vw, 18px);
+      color: var(--muted);
+      max-width: 580px;
+      line-height: 1.8;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 14px 30px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(201,169,110,0.25);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(201,169,110,0.45);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-weight: 400;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 30px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--gold);
+      background: rgba(201,169,110,0.05);
+    }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollDown 1.5s ease-in-out infinite;
+    }
+    @keyframes scrollDown {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      51% { transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 64px;
+      flex-wrap: wrap;
+    }
+    .hero-stat-num {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 300;
+      color: var(--gold);
+      display: block;
+      line-height: 1;
+    }
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.08em;
+    }
+
+    /* ============================================================
+       SEÇÃO: O QUE É
+    ============================================================ */
+    #o-que-e { background: var(--surface); position: relative; }
+    #o-que-e::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .o-que-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    @media (max-width: 768px) { .o-que-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+    .o-que-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 56px);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .o-que-text { color: var(--muted); line-height: 1.9; margin-bottom: 16px; font-weight: 300; }
+
+    .highlight-cards { display: flex; flex-direction: column; gap: 16px; }
+
+    .hcard {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .hcard:hover { border-color: var(--gold); transform: translateX(6px); }
+    .hcard-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: rgba(201,169,110,0.08);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hcard-icon svg { width: 20px; height: 20px; }
+    .hcard-title { font-family: var(--font-display); font-weight: 400; font-size: 17px; margin-bottom: 4px; letter-spacing: 0.02em; }
+    .hcard-text { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+
+    /* ============================================================
+       SEÇÃO: PILARES / ÁREAS
+    ============================================================ */
+    #areas { background: var(--black); }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4.5vw, 56px);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 540px;
+      line-height: 1.8;
+      margin-bottom: 64px;
+      font-weight: 300;
+    }
+
+    .areas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .area-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 36px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.4s;
+      cursor: default;
+    }
+    .area-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gradient);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    .area-card:hover { border-color: rgba(201,169,110,0.35); transform: translateY(-6px); }
+    .area-card:hover::before { transform: scaleX(1); }
+
+    .area-num {
+      font-family: var(--font-display);
+      font-size: 80px;
+      font-weight: 300;
+      color: rgba(201,169,110,0.05);
+      position: absolute;
+      top: 10px; right: 20px;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .area-icon {
+      width: 48px; height: 48px;
+      background: rgba(201,169,110,0.08);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .area-icon svg { width: 24px; height: 24px; }
+    .area-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .area-desc { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 16px; font-weight: 300; }
+    .area-example {
+      font-size: 12px;
+      color: var(--gold);
+      background: rgba(201,169,110,0.06);
+      border-radius: 4px;
+      padding: 10px 14px;
+      line-height: 1.6;
+    }
+    .area-example strong { display: block; margin-bottom: 2px; font-weight: 500; letter-spacing: 0.05em; }
+
+    /* ============================================================
+       SEÇÃO: REFERÊNCIAS / TECNOLOGIA
+    ============================================================ */
+    #tecnologia {
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+    #tecnologia::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rose), transparent);
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .tech-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .tech-item:hover {
+      transform: translateY(-8px);
+      border-color: var(--rose);
+      box-shadow: 0 20px 60px rgba(212,116,138,0.12);
+    }
+    .tech-item svg { width: 36px; height: 36px; margin-bottom: 14px; }
+    .tech-item h3 { font-family: var(--font-display); font-size: 18px; font-weight: 400; margin-bottom: 8px; }
+    .tech-item p { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+
+    /* Decoração de fundo — arabescos */
+    .orbit-wrapper {
+      position: absolute;
+      right: -200px; top: 50%;
+      transform: translateY(-50%);
+      width: 600px; height: 600px;
+      pointer-events: none;
+      opacity: 0.08;
+    }
+    .orbit-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      animation: spin linear infinite;
+    }
+    .orbit-ring:nth-child(1) { inset: 0; animation-duration: 30s; }
+    .orbit-ring:nth-child(2) { inset: 80px; animation-duration: 50s; animation-direction: reverse; }
+    .orbit-ring:nth-child(3) { inset: 160px; animation-duration: 70s; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ============================================================
+       SEÇÃO: PROJETO EXEMPLO
+    ============================================================ */
+    #projeto { background: var(--black); }
+
+    .projeto-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .projeto-header {
+      background: var(--gradient);
+      padding: 52px 48px;
+      position: relative;
+    }
+    .projeto-header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M20 20.5V18H0v5h5v5H0v5h20v-5h15v-5H20v-.5zm-1-8.5h1V4h-4v6H2v4h17V12h-.5zM0 14V9h1v5H0zm1-5h18v4H1V9zm18 6h2v4h-2v-4zM20 7V4h1v3h-1zm0-4h4v4h-4V3zm0 10h1v4h-1v-4zm4-6v3h-4V7h4z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .projeto-tag {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.2);
+      color: white;
+      padding: 4px 14px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .projeto-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 3vw, 40px);
+      font-weight: 300;
+      color: white;
+      max-width: 640px;
+      line-height: 1.2;
+      position: relative;
+    }
+
+    .projeto-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
+    }
+    .projeto-col {
+      padding: 40px;
+      border-right: 1px solid var(--border);
+    }
+    .projeto-col:last-child { border-right: none; }
+    @media (max-width: 768px) {
+      .projeto-col { border-right: none; border-bottom: 1px solid var(--border); }
+      .projeto-col:last-child { border-bottom: none; }
+    }
+    .projeto-col-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .projeto-col h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+    .projeto-col p { font-size: 14px; color: var(--muted); line-height: 1.8; font-weight: 300; }
+
+    .impacto-bar { margin-top: 20px; }
+    .impacto-item { margin-bottom: 14px; }
+    .impacto-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .impacto-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .impacto-fill {
+      height: 100%;
+      background: var(--gradient);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 1s cubic-bezier(.16,1,.3,1);
+    }
+    .impacto-fill.animated { transform: scaleX(1); }
+
+    /* ============================================================
+       SEÇÃO: COMPETÊNCIAS
+    ============================================================ */
+    #competencias { background: var(--surface); }
+    #competencias::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    #competencias { position: relative; }
+
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .comp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .comp-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .comp-card:hover::after { opacity: 0.04; }
+    .comp-card:hover { border-color: rgba(201,169,110,0.4); transform: scale(1.04); }
+    .comp-card svg { width: 30px; height: 30px; margin-bottom: 12px; }
+    .comp-card h3 { font-family: var(--font-display); font-size: 16px; font-weight: 400; }
+
+    /* ============================================================
+       SEÇÃO: TIMELINE
+    ============================================================ */
+    #timeline { background: var(--black); overflow: hidden; }
+
+    .timeline-track {
+      display: flex;
+      gap: 0;
+      position: relative;
+      margin-top: 64px;
+    }
+    .timeline-track::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .timeline-progress {
+      position: absolute;
+      top: 40px; left: 0;
+      height: 1px;
+      background: var(--gradient);
+      width: 0%;
+      transition: width 1.5s cubic-bezier(.16,1,.3,1);
+    }
+
+    .tl-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding-top: 0;
+    }
+    .tl-dot {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 2px solid var(--border);
+      position: relative;
+      z-index: 1;
+      transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+      flex-shrink: 0;
+      margin-bottom: 24px;
+    }
+    .tl-step.active .tl-dot {
+      background: var(--gold);
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(201,169,110,0.5);
+    }
+    .tl-label {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      transition: color 0.4s;
+    }
+    .tl-step.active .tl-label { color: var(--gold); }
+    .tl-desc { font-size: 12px; color: var(--muted); line-height: 1.6; max-width: 110px; font-weight: 300; }
+
+    @media (max-width: 768px) {
+      .timeline-track { flex-direction: column; gap: 24px; }
+      .timeline-track::before { display: none; }
+      .timeline-progress { display: none; }
+      .tl-step { flex-direction: row; text-align: left; gap: 16px; align-items: flex-start; }
+      .tl-dot { margin-bottom: 0; flex-shrink: 0; margin-top: 2px; }
+    }
+
+    /* ============================================================
+       SEÇÃO: CARREIRAS
+    ============================================================ */
+    #carreiras { background: var(--surface); position: relative; overflow: hidden; }
+
+    .carreiras-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .carreira-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px;
+      transition: all 0.3s;
+    }
+    .carreira-card:hover { border-color: var(--rose); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(212,116,138,0.08); }
+    .carreira-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: rgba(212,116,138,0.08);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .carreira-icon svg { width: 22px; height: 22px; }
+    .carreira-card h3 { font-family: var(--font-display); font-size: 18px; font-weight: 400; margin-bottom: 6px; }
+    .carreira-card p { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+
+    /* ============================================================
+       CTA FINAL
+    ============================================================ */
+    #cta {
+      background: var(--black);
+      text-align: center;
+      padding: 140px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      background: radial-gradient(circle, rgba(201,169,110,0.10) 0%, rgba(212,116,138,0.06) 50%, transparent 100%);
+      pointer-events: none;
+    }
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5.5vw, 72px);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .cta-sub { font-size: 17px; color: var(--muted); margin-bottom: 48px; position: relative; font-weight: 300; line-height: 1.8; }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 60px 0;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+    }
+    .footer-logo span { color: var(--gold); font-style: italic; }
+    .footer-info { font-size: 13px; color: var(--muted); line-height: 1.9; font-weight: 300; }
+    .footer-quote {
+      font-family: var(--font-display);
+      font-size: 15px;
+      color: var(--muted);
+      font-style: italic;
+      max-width: 320px;
+      text-align: right;
+      font-weight: 300;
+    }
+    .footer-bottom {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .parallax-layer { will-change: transform; }
+
+    /* Animação de entrada hero */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-badge   { animation: fadeUp 0.8s 0.2s both; }
+    .hero-title   { animation: fadeUp 0.8s 0.4s both; }
+    .hero-sub     { animation: fadeUp 0.8s 0.6s both; }
+    .hero-actions { animation: fadeUp 0.8s 0.8s both; }
+    .hero-stats   { animation: fadeUp 0.8s 1.0s both; }
+  </style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     NAVEGAÇÃO
+============================================================ -->
+<nav id="navbar">
+  <div class="container nav-inner">
+    <div class="nav-logo">Studio <span>Elara</span></div>
+    <ul class="nav-links">
+      <li><a href="#o-que-e">O Estúdio</a></li>
+      <li><a href="#areas">Pilares</a></li>
+      <li><a href="#projeto">Coleção</a></li>
+      <li><a href="#carreiras">Carreiras</a></li>
+      <li><a href="#cta" class="nav-cta">Entrar</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section id="hero">
+  <canvas id="particle-canvas"></canvas>
+  <div class="hero-grid parallax-layer" data-speed="0.3"></div>
+  <div class="hero-glow hero-glow-1 parallax-layer" data-speed="0.2"></div>
+  <div class="hero-glow hero-glow-2 parallax-layer" data-speed="0.15"></div>
+
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">Eletiva 2º Ano — Ensino Médio</div>
+
+      <h1 class="hero-title">
+        Moda:<br>
+        <span class="gradient-text">Da Ideia ao</span><br>
+        Desfile
+      </h1>
+
+      <p class="hero-sub">
+        Muito além das tendências. Aqui você explora criatividade, identidade visual,
+        sustentabilidade e mercado — desenvolvendo um olhar único para o universo
+        da moda que o mundo está reinventando.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#o-que-e" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Descobrir a Eletiva
+        </a>
+        <a href="#projeto" class="btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>
+          Ver Coleção Exemplo
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div>
+          <span class="hero-stat-num" data-count="5">0</span>
+          <p class="hero-stat-label">Pilares criativos</p>
+        </div>
+        <div>
+          <span class="hero-stat-num" data-count="8">0</span>
+          <p class="hero-stat-label">Competências desenvolvidas</p>
+        </div>
+        <div>
+          <span class="hero-stat-num" data-count="6">0</span>
+          <p class="hero-stat-label">Etapas de coleção real</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Rolar</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     O QUE É A ELETIVA
+============================================================ -->
+<section id="o-que-e">
+  <div class="container">
+    <div class="o-que-grid">
+
+      <div class="reveal">
+        <div class="section-label">A Proposta</div>
+        <h2 class="o-que-title">
+          Uma disciplina que forma seu <span class="gradient-text">olhar criativo</span>
+        </h2>
+        <p class="o-que-text">
+          A eletiva de Moda foi criada para ir além das roupas. Em vez de seguir
+          tendências sem questionar, você aprende a <strong>pensar como estilista</strong>:
+          entender contexto cultural, criar narrativas visuais, desenvolver coleções e
+          apresentar ideias com confiança.
+        </p>
+        <p class="o-que-text">
+          Com metodologias usadas por grandes casas de moda e escolas de design do mundo,
+          a eletiva conecta arte, identidade e mercado em projetos concretos que você
+          pode mostrar para qualquer faculdade ou marca.
+        </p>
+      </div>
+
+      <div class="highlight-cards">
+        <div class="hcard reveal stagger-1">
+          <div class="hcard-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.3L12 17l-6.2 4.2 2.4-7.3L2 9.4h7.6z"/></svg>
+          </div>
+          <div>
+            <div class="hcard-title">Criatividade Aplicada</div>
+            <div class="hcard-text">Você esboça, experimenta tecidos e apresenta. A moda é feita de escolhas reais.</div>
+          </div>
+        </div>
+        <div class="hcard reveal stagger-2">
+          <div class="hcard-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <div>
+            <div class="hcard-title">Tendências & Contexto</div>
+            <div class="hcard-text">Entender o passado da moda para criar o futuro — com intenção, não acidente.</div>
+          </div>
+        </div>
+        <div class="hcard reveal stagger-3">
+          <div class="hcard-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="hcard-title">Colaboração Real</div>
+            <div class="hcard-text">Coleções desenvolvidas em equipe com papéis definidos — como em uma maison.</div>
+          </div>
+        </div>
+        <div class="hcard reveal stagger-4">
+          <div class="hcard-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="hcard-title">Diferencial no Vestibular</div>
+            <div class="hcard-text">Portfolio e competências que destacam seu currículo em entrevistas e redações.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PILARES / ÁREAS
+============================================================ -->
+<section id="areas">
+  <div class="container">
+    <div class="section-label reveal">Pilares da Disciplina</div>
+    <h2 class="section-title reveal">Cinco pilares que formam<br><span class="gradient-text">criadores do amanhã</span></h2>
+    <p class="section-sub reveal">Cada pilar foi escolhido por seu impacto direto no mercado e na formação de designers, estilistas e comunicadores de moda.</p>
+
+    <div class="areas-grid">
+
+      <div class="area-card reveal stagger-1">
+        <span class="area-num">01</span>
+        <div class="area-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3 class="area-title">Design & Identidade Visual</h3>
+        <p class="area-desc">Aprende a criar uma linguagem visual própria: paleta de cores, silhuetas, texturas e a narrativa por trás de cada escolha estética.</p>
+        <div class="area-example">
+          <strong>Exemplo prático:</strong>
+          Criar um mood board completo de uma coleção cápsula inspirada em um movimento artístico brasileiro.
+        </div>
+      </div>
+
+      <div class="area-card reveal stagger-2">
+        <span class="area-num">02</span>
+        <div class="area-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3 class="area-title">História & Cultura da Moda</h3>
+        <p class="area-desc">De Coco Chanel à Virgil Abloh. Entender como a moda espelha a sociedade e como movimentos culturais nascem em peças de roupa.</p>
+        <div class="area-example">
+          <strong>Exemplo prático:</strong>
+          Analisar como a moda brasileira dos anos 80 refletia a redemocratização e criar uma reinterpretação contemporânea.
+        </div>
+      </div>
+
+      <div class="area-card reveal stagger-3">
+        <span class="area-num">03</span>
+        <div class="area-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        </div>
+        <h3 class="area-title">Sustentabilidade na Moda</h3>
+        <p class="area-desc">O fast fashion, o impacto ambiental e como marcas estão reinventando a indústria com materiais alternativos, upcycling e consumo consciente.</p>
+        <div class="area-example">
+          <strong>Exemplo prático:</strong>
+          Criar uma peça exclusiva usando apenas materiais descartados e calcular a redução de CO₂ em relação à produção convencional.
+        </div>
+      </div>
+
+      <div class="area-card reveal stagger-4">
+        <span class="area-num">04</span>
+        <div class="area-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3 class="area-title">Fotografia & Styling</h3>
+        <p class="area-desc">Aprender a contar histórias com imagens: composição, luz, escolha de modelos e construção de um editorial de moda do zero.</p>
+        <div class="area-example">
+          <strong>Exemplo prático:</strong>
+          Produzir um editorial fotográfico completo — conceito, produção de moda, locação e edição — para divulgar a coleção da turma.
+        </div>
+      </div>
+
+      <div class="area-card reveal stagger-5">
+        <span class="area-num">05</span>
+        <div class="area-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="area-title">Branding & Mercado de Moda</h3>
+        <p class="area-desc">Como marcas criam desejo, como funciona o calendário fashion, precificação, canais de venda e como o digital transformou tudo.</p>
+        <div class="area-example">
+          <strong>Exemplo prático:</strong>
+          Criar o branding completo de uma marca autoral: nome, logo, posicionamento, tom de voz e estratégia de lançamento no Instagram.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     REFERÊNCIAS & FERRAMENTAS
+============================================================ -->
+<section id="tecnologia">
+  <div class="orbit-wrapper">
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring"></div>
+  </div>
+  <div class="container" style="position:relative">
+    <div class="section-label reveal">Ferramentas do Criador</div>
+    <h2 class="section-title reveal">Do esboço ao <span class="gradient-text">produto final</span></h2>
+    <p class="section-sub reveal">O que você aprende na eletiva pode ser aplicado diretamente na criação de produtos, campanhas e marcas que impactam culturas.</p>
+
+    <div class="tech-grid">
+
+      <div class="tech-item reveal stagger-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+        <h3>Adobe & Canva</h3>
+        <p>Ferramentas digitais para criar mood boards, lookbooks e peças gráficas profissionais.</p>
+      </div>
+
+      <div class="tech-item reveal stagger-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <h3>Croqui & Ilustração</h3>
+        <p>Desenvolvimento de figurinos e esboços técnicos — da mão ao digital (Procreate, Illustrator).</p>
+      </div>
+
+      <div class="tech-item reveal stagger-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+        <h3>Redes Sociais</h3>
+        <p>Estratégia de conteúdo, reels de moda, storytelling e criação de audiência para marcas autorais.</p>
+      </div>
+
+      <div class="tech-item reveal stagger-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <h3>Produção Têxtil</h3>
+        <p>Tipos de tecido, caimento, corte, costura básica e como virar um protótipo de peça real.</p>
+      </div>
+
+      <div class="tech-item reveal stagger-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <h3>Fashion Film</h3>
+        <p>Vídeo editorial, direção criativa e apresentações visuais que hoje dominam o mercado da moda.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PROJETO EXEMPLO — COLEÇÃO
+============================================================ -->
+<section id="projeto">
+  <div class="container">
+    <div class="section-label reveal">Coleção Fictícia — Exemplo Real</div>
+    <h2 class="section-title reveal">Como uma coleção da eletiva<br><span class="gradient-text">nasce e chega ao desfile</span></h2>
+    <p class="section-sub reveal">Veja como os alunos desenvolveriam uma coleção completa do zero, com metodologia de mercado real.</p>
+
+    <div class="projeto-wrapper reveal">
+      <div class="projeto-header">
+        <span class="projeto-tag">Coleção de Impacto Cultural</span>
+        <h2>Maré Alta — Coleção inspirada na cultura afro-carioca e no axé do Rio de Janeiro</h2>
+      </div>
+      <div class="projeto-body">
+        <div class="projeto-col">
+          <div class="projeto-col-label">A Inspiração</div>
+          <h3>Identidade invisível</h3>
+          <p>A riqueza da cultura afro-brasileira ainda é sub-representada no mercado de moda nacional. Cores vibrantes, tecidos como o angolano e a estética do Candomblé seguem sendo apagados pelas grandes marcas.</p>
+        </div>
+        <div class="projeto-col">
+          <div class="projeto-col-label">A Solução</div>
+          <h3>Coleção cápsula autoral</h3>
+          <p>8 looks com paleta de cores baseada nos Orixás, tecidos naturais e bordados à mão. Cada peça conta uma história: acompanhada de texto, fotografia e vídeo curto para construir a narrativa da coleção nas redes.</p>
+        </div>
+        <div class="projeto-col">
+          <div class="projeto-col-label">O Protótipo</div>
+          <h3>Figurinos + Editorial</h3>
+          <p>3 peças físicas costuradas em grupo. Editorial fotográfico realizado em locação no Maracanã. Lookbook digital de 12 páginas montado no Canva e apresentado para banca convidada com profissionais da área.</p>
+        </div>
+        <div class="projeto-col">
+          <div class="projeto-col-label">Impacto Estimado</div>
+          <h3>Métricas do projeto</h3>
+          <div class="impacto-bar">
+            <div class="impacto-item">
+              <div class="impacto-label"><span>Engajamento nas redes</span><span>88%</span></div>
+              <div class="impacto-track"><div class="impacto-fill" style="--w:0.88"></div></div>
+            </div>
+            <div class="impacto-item">
+              <div class="impacto-label"><span>Aprovação na banca</span><span>95%</span></div>
+              <div class="impacto-track"><div class="impacto-fill" style="--w:0.95"></div></div>
+            </div>
+            <div class="impacto-item">
+              <div class="impacto-label"><span>Material reutilizado</span><span>70%</span></div>
+              <div class="impacto-track"><div class="impacto-fill" style="--w:0.70"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     COMPETÊNCIAS
+============================================================ -->
+<section id="competencias">
+  <div class="container">
+    <div class="section-label reveal">O Que Você Leva</div>
+    <h2 class="section-title reveal">Competências que abrem<br><span class="gradient-text">qualquer porta</span></h2>
+    <p class="section-sub reveal">Habilidades que as melhores escolas de design, moda e comunicação do mundo listam como essenciais para o profissional do século XXI.</p>
+
+    <div class="comp-grid">
+
+      <div class="comp-card reveal stagger-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <h3>Criatividade</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <h3>Trabalho em Equipe</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h3>Liderança</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <h3>Pensamento Crítico</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <h3>Planejamento</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <h3>Inovação</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <h3>Identidade de Marca</h3>
+      </div>
+
+      <div class="comp-card reveal stagger-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <h3>Empreendedorismo</h3>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TIMELINE — JORNADA DA COLEÇÃO
+============================================================ -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-label reveal">Jornada da Coleção</div>
+    <h2 class="section-title reveal">De uma referência até o <span class="gradient-text">desfile final</span></h2>
+    <p class="section-sub reveal">Seis etapas que simulam exatamente como coleções são desenvolvidas nas maiores maisons e marcas do mundo.</p>
+
+    <div class="timeline-track" id="timeline-track">
+      <div class="timeline-progress" id="timeline-progress"></div>
+
+      <div class="tl-step" data-step="0">
+        <div class="tl-dot"></div>
+        <div class="tl-label">Conceito</div>
+        <p class="tl-desc">Definir o tema, referências culturais e a história da coleção</p>
+      </div>
+      <div class="tl-step" data-step="1">
+        <div class="tl-dot"></div>
+        <div class="tl-label">Pesquisa</div>
+        <p class="tl-desc">Referências visuais, tecidos, cores e análise de mercado</p>
+      </div>
+      <div class="tl-step" data-step="2">
+        <div class="tl-dot"></div>
+        <div class="tl-label">Croquis</div>
+        <p class="tl-desc">Esboço dos looks, definição de silhuetas e paleta final</p>
+      </div>
+      <div class="tl-step" data-step="3">
+        <div class="tl-dot"></div>
+        <div class="tl-label">Protótipo</div>
+        <p class="tl-desc">Costura das peças e construção física do primeiro look</p>
+      </div>
+      <div class="tl-step" data-step="4">
+        <div class="tl-dot"></div>
+        <div class="tl-label">Editorial</div>
+        <p class="tl-desc">Sessão de fotos, styling e lookbook digital da coleção</p>
+      </div>
+      <div class="tl-step" data-step="5">
+        <div class="tl-dot"></div>
+        <div class="tl-label">Desfile</div>
+        <p class="tl-desc">Apresentação final com banca, modelos e mídias sociais</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FUTURAS CARREIRAS
+============================================================ -->
+<section id="carreiras">
+  <div class="container">
+    <div class="section-label reveal">Onde Você Pode Chegar</div>
+    <h2 class="section-title reveal">Carreiras que esta<br><span class="gradient-text">eletiva prepara</span></h2>
+
+    <div class="carreiras-grid">
+
+      <div class="carreira-card reveal stagger-1">
+        <div class="carreira-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <div>
+          <h3>Estilismo & Design de Moda</h3>
+          <p>Criar coleções para marcas, estúdios próprios ou como freelancer — o caminho mais direto da eletiva ao ateliê.</p>
+        </div>
+      </div>
+
+      <div class="carreira-card reveal stagger-2">
+        <div class="carreira-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+        </div>
+        <div>
+          <h3>Fotografia & Direção de Arte</h3>
+          <p>Campanhas, editoriais, lookbooks — profissionais que unem estética e narrativa visual são cada vez mais valorizados.</p>
+        </div>
+      </div>
+
+      <div class="carreira-card reveal stagger-3">
+        <div class="carreira-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+        </div>
+        <div>
+          <h3>Influência Digital & Conteúdo</h3>
+          <p>Criadores de conteúdo de moda são consultores, editores e embaixadores. O mercado paga bem por quem entende moda de verdade.</p>
+        </div>
+      </div>
+
+      <div class="carreira-card reveal stagger-4">
+        <div class="carreira-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <h3>Branding & Marketing de Moda</h3>
+          <p>Construir marcas, posicionamento e desejo — o backstage que faz uma peça virar ícone cultural.</p>
+        </div>
+      </div>
+
+      <div class="carreira-card reveal stagger-5">
+        <div class="carreira-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        </div>
+        <div>
+          <h3>Produção de Moda</h3>
+          <p>Coordenar desfiles, shootings e eventos. A engrenagem invisível que faz a roda da indústria girar.</p>
+        </div>
+      </div>
+
+      <div class="carreira-card reveal stagger-1">
+        <div class="carreira-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div>
+          <h3>Moda Sustentável & Empreendedorismo</h3>
+          <p>Criar marcas com propósito. O mercado de moda consciente cresce 20% ao ano — e o Rio tem tudo para liderar isso.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CTA FINAL
+============================================================ -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="container" style="position:relative">
+    <div class="section-label reveal" style="justify-content:center">Sua Escolha</div>
+    <h2 class="cta-title reveal">
+      A moda pertence a<br>
+      <span class="gradient-text">quem tem algo a dizer.</span>
+    </h2>
+    <p class="cta-sub reveal">Escolha a eletiva de Moda. Saia da tendência alheia.<br>Entre no mundo de quem cria, narra e transforma.</p>
+    <div class="hero-actions reveal" style="justify-content:center">
+      <a href="#o-que-e" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Quero Participar
+      </a>
+      <a href="#areas" class="btn-ghost">Conhecer os Pilares</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">Studio <span>Elara</span></div>
+        <div class="footer-info" style="margin-top:12px">
+          Eletiva de Moda — 2º Ano do Ensino Médio<br>
+          Elite Rede de Ensino · Rio de Janeiro, RJ
+        </div>
+      </div>
+      <div class="footer-quote">
+        "A moda não é algo que existe apenas em vestidos. A moda está no céu, na rua; a moda tem a ver com ideias, com o jeito que vivemos, com o que está acontecendo."<br>
+        <span style="color:var(--gold); font-style:normal; font-size:12px; margin-top:8px; display:block; letter-spacing:0.08em;">— Coco Chanel</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 Elite Rede de Ensino · Site desenvolvido como projeto da própria eletiva.
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+  /* ----------------------------------------------------------
+     CANVAS DE PARTÍCULAS (adaptado para moda — ouro e rosa)
+  ---------------------------------------------------------- */
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let mouse = { x: null, y: null };
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 1.2 + 0.3;
+      this.speedX = (Math.random() - 0.5) * 0.2;
+      this.speedY = (Math.random() - 0.5) * 0.2;
+      this.opacity = Math.random() * 0.4 + 0.05;
+      this.color = Math.random() > 0.5 ? '201,169,110' : '212,116,138';
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+      if (mouse.x) {
+        const dx = mouse.x - this.x, dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 100) {
+          this.x -= dx * 0.008;
+          this.y -= dy * 0.008;
+        }
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 70; i++) particles.push(new Particle());
+
+  function connectParticles() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 90) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(201,169,110,${0.06 * (1 - dist/90)})`;
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    connectParticles();
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  /* ----------------------------------------------------------
+     NAVBAR SCROLL
+  ---------------------------------------------------------- */
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  /* ----------------------------------------------------------
+     REVEAL AO SCROLL (IntersectionObserver)
+  ---------------------------------------------------------- */
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => revealObs.observe(el));
+
+  /* ----------------------------------------------------------
+     CONTADOR HERO
+  ---------------------------------------------------------- */
+  const counters = document.querySelectorAll('[data-count]');
+  const counterObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const target = +entry.target.dataset.count;
+        let current = 0;
+        const step = () => {
+          current++;
+          entry.target.textContent = current;
+          if (current < target) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+        counterObs.unobserve(entry.target);
+      }
+    });
+  });
+  counters.forEach(c => counterObs.observe(c));
+
+  /* ----------------------------------------------------------
+     PARALLAX (suave, baseado em scroll)
+  ---------------------------------------------------------- */
+  const parallaxLayers = document.querySelectorAll('.parallax-layer');
+  function onScroll() {
+    const y = window.scrollY;
+    parallaxLayers.forEach(el => {
+      const speed = parseFloat(el.dataset.speed || 0.2);
+      el.style.transform = `translateY(${y * speed}px)`;
+    });
+    animateTimeline();
+    animateImpacto();
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ----------------------------------------------------------
+     TIMELINE PROGRESSIVA
+  ---------------------------------------------------------- */
+  const tlTrack = document.getElementById('timeline-track');
+  const tlProgress = document.getElementById('timeline-progress');
+  const tlSteps = document.querySelectorAll('.tl-step');
+  let timelineAnimated = false;
+
+  function animateTimeline() {
+    if (!tlTrack) return;
+    const rect = tlTrack.getBoundingClientRect();
+    const vh = window.innerHeight;
+    if (rect.top < vh * 0.8 && !timelineAnimated) {
+      timelineAnimated = true;
+      tlSteps.forEach((step, i) => {
+        setTimeout(() => {
+          step.classList.add('active');
+          const pct = ((i + 1) / tlSteps.length) * 100;
+          if (tlProgress) tlProgress.style.width = pct + '%';
+        }, i * 250);
+      });
+    }
+  }
+
+  /* ----------------------------------------------------------
+     BARRAS DE IMPACTO DO PROJETO
+  ---------------------------------------------------------- */
+  let impactoAnimated = false;
+  function animateImpacto() {
+    if (impactoAnimated) return;
+    const fills = document.querySelectorAll('.impacto-fill');
+    if (!fills.length) return;
+    const rect = fills[0].getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.9) {
+      impactoAnimated = true;
+      fills.forEach(fill => {
+        const w = fill.style.getPropertyValue('--w');
+        fill.style.transform = `scaleX(${w})`;
+        fill.classList.add('animated');
+      });
+    }
+  }
+
+  /* ----------------------------------------------------------
+     EFEITO 3D LEVE NOS CARDS (mouse tilt)
+  ---------------------------------------------------------- */
+  document.querySelectorAll('.area-card, .tech-item, .comp-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      card.style.transform = `perspective(600px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  /* ----------------------------------------------------------
+     SMOOTH ANCHOR SCROLL
+  ---------------------------------------------------------- */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
